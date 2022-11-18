@@ -22,8 +22,6 @@ import software.amazon.awscdk.services.rds.DatabaseInstanceEngine;
 import software.amazon.awscdk.services.rds.MySqlInstanceEngineProps;
 import software.amazon.awscdk.services.rds.MysqlEngineVersion;
 import software.constructs.Construct;
-// import software.amazon.awscdk.Duration;
-// import software.amazon.awscdk.services.sqs.Queue;
 
 public class RDSStack extends Stack {
     public RDSStack(final Construct scope, final String id, Vpc vpc) {
@@ -35,6 +33,7 @@ public class RDSStack extends Stack {
 
         final CfnParameter databasePassword = CfnParameter.Builder
                 .create(this, "databasePassword")
+                .type("String")
                 .description("RDS instance password")
                 .build();
 
@@ -51,13 +50,13 @@ public class RDSStack extends Stack {
                 .vpc(vpc)
                 .credentials(Credentials.fromUsername("admin", CredentialsFromUsernameOptions
                         .builder()
-                        .password(SecretValue.unsafePlainText(databasePassword.getValueAsString()))
+                        .password(SecretValue.plainText(databasePassword.getValueAsString()))
                         .build()))
                 .instanceType(InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.MICRO))
                 .multiAz(false)
                 .allocatedStorage(10)
                 .securityGroups(Collections.singletonList(iSecurityGroup))
-                .vpcSubnets(SubnetSelection.builder().subnets(vpc.getPrivateSubnets()).build())
+                .vpcSubnets(SubnetSelection.builder().subnets(vpc.getPublicSubnets()).build())
                 .build();
 
         CfnOutput.Builder.create(this, "rds-endpoint")

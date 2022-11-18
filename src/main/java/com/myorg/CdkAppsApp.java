@@ -14,10 +14,16 @@ public class CdkAppsApp {
         RDSStack rdsStack = new RDSStack(app, "Rds", vpc.getVpc());
         rdsStack.addDependency(vpc);
 
-        Service01Stack service01Stack = new Service01Stack(app, "ServiceAAB", clusterStack.getCluster());
-        service01Stack.addDependency(clusterStack);
+        SnsStack snsStack = new SnsStack(app, "Sns");
 
-        // Ver se realmente eu posso colocar o Service como dependencia do RDS ou não pois o Service está exportando variaveis que o RDS Precisa
+        Service01Stack service01Stack = new Service01Stack(app, "ServiceAAB", clusterStack.getCluster(), snsStack.getProductEventsTopic());
+        service01Stack.addDependency(clusterStack);
+        service01Stack.addDependency(rdsStack);
+        service01Stack.addDependency(snsStack);
+
+        Service02Stack service02Stack = new Service02Stack(app, "ServiceAAB02", clusterStack.getCluster(), snsStack.getProductEventsTopic());
+        service02Stack.addDependency(clusterStack);
+        service02Stack.addDependency(snsStack);
 
         app.synth();
     }
